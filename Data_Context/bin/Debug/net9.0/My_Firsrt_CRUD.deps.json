@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "My_Firsrt_CRUD/1.0.0": {
+        "dependencies": {
+          "ModelAss": "1.0.0"
+        },
+        "runtime": {
+          "My_Firsrt_CRUD.dll": {}
+        }
+      },
+      "ModelAss/1.0.0": {
+        "runtime": {
+          "ModelAss.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "My_Firsrt_CRUD/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "ModelAss/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
