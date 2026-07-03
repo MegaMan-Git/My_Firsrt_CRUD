@@ -1,0 +1,91 @@
+﻿@model ModelAss.ViewList.ViewModel_Product
+@{
+    ViewData["Title"] = "دسته بندی ها";
+    ViewData["Customer_ID"] = Model.Customer_ID;
+  
+    int i = 0; //شمارنده برای ارسال دسته جمعی نام های تغییر داده شده
+}
+@*دسته بندی ها*@
+<div style="display:flex; flex-direction:row;">@*تگ واحد*@
+    <div style="flex-grow:8" class="container-fluid table-responsive">@*تگ اول داخل تگ واحد*@
+
+    <table class="table table-bordered text-center">
+        @if (Model.Categories != null){
+        <thead class="table-dark">
+
+            <tr>
+                <th>نام دسته بندی</th>
+                <th>ویرایش نام</th>
+                <th>حذف</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        <form id="form" asp-controller="Product" asp-action="CategoryNameUpdate">    
+            @foreach(var item in Model.Categories)
+            {
+                // را پاک کند NoCategory نباید بتواند 
+                if (@item.Category_Id == 1) continue;
+               
+                <tr>
+                    <td>
+                        @item.Category_Name
+                    </td>
+                    <td>
+                        @*ارسال آیدی و نام جدید دسته بندی*@
+                        <input class="text-center" type="text" name="Categories[@i].Category_NewName" maxlength="30" value="@item.Category_Name" />
+                        <input type="hidden" name="Categories[@i].Category_Id" value="@item.Category_Id" />
+                    </td>
+                    <td>
+                        @*لینک حذف دسته بندی*@
+                        <a asp-controller="Product" asp-action="CategoryDelete" 
+                        asp-route-CategoryID="@item.Category_Id" asp-route-Customer_ID="@Model.Customer_ID">Delete</a>
+                    </td>
+                </tr>
+                
+            i++;    
+            }
+            @*ارسال آیدی مشتری*@
+            <input type="hidden" asp-for ="Customer_ID" value="@Model.Customer_ID" />
+           </form>                
+        </tbody>
+        }
+    </table>        
+    </div>
+
+
+@*افزودن دسته بندی*@
+<div style="flex-grow:1;"> @*تگ دوم داخل تگ واحد*@
+    <table class="text-center" style="border:solid 7px black">
+        <thead style="background-color:black; color:white">
+        <tr>
+            <th>دسته بندی جدید</th>
+        </tr>
+        </thead>
+
+        <tbody>
+            <form asp-controller="Product" asp-action="CategoryCreate" method="post">
+            <tr>
+                <td>
+                    <input class="text-center" type="text" name="Category_NewName" maxlength="30" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input class="btn btn-primary" type="submit" name="Save" value="افزودن" />
+                </td>
+            </tr>
+            @*ارسال آیدی مشتری*@
+            <input type="hidden" name="Customer_ID" value="@Model.Customer_ID" />
+            </form>
+        </tbody>
+    </table>
+    
+</div>
+
+</div>
+
+@*دکمه بروزرسانی*@
+<div style="margin-left:10px;">
+    <input form="form" class="btn btn-primary" type="submit" name="Save" value="بروزرسانی همه" />
+</div>

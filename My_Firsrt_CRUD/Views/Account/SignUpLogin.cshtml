@@ -1,0 +1,116 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>ورود و ثبت نام</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/My_Firsrt_CRUD.styles.css" asp-append-version="true" />
+</head>
+
+<body style="direction:rtl;">
+
+    <div class="container">
+
+        <div class="row">
+
+            <!-- فرم سمت راست -->
+            <div class="col-md-6">
+                <div class="panel panel-default">
+
+                    <div class="panel-heading">
+                        <br/>
+                        <h3 class="panel-title">ثبت‌ نام</h3>
+                        <br/>
+                    </div>
+
+                    <div class="panel-body">
+                        @*فرم ثبت نام*@
+                        <form asp-action="SignUp" method="post">
+                            <br/>
+
+                            <div class="form-group">
+                                @Html.Label("نام") 
+                                <input type="text" name="FirstName" class="form-control" required />
+                            </div>
+
+                            <br/>
+
+                            <div class="form-group">
+                                @Html.Label("نام خانوادگی") 
+                                <input type="text" name="LastName" class="form-control" required />
+                            </div>
+
+                            <br/>
+
+                            <div class="form-group">
+                                @Html.Label("شماره تلفن") 
+                                <input type="text" name="Phone" class="form-control" required />
+                            </div>
+
+                            <br/>
+
+                            <div class="form-group">
+                                @Html.Label("آدرس") <br/>
+                                <input type="text" name="Address" class="form-control" required />
+                            </div>
+
+                            <br/>
+
+                            <div class="form-group">
+                                @Html.Label("رمز عبور") <br/>
+                                <input type="password" name="Password" class="form-control" required />
+                            </div>
+
+                            <br/>
+
+                            <button type="submit" class="btn btn-primary">ثبت‌نام</button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- فرم سمت چپ -->
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    
+                    <div class="panel-heading">
+                        <br/>
+                        <h3 class="panel-title">ورود</h3>
+                        <br/>
+                    </div>
+                    
+                    <div class="panel-body">
+                        @*فرم ورود*@
+                        <form asp-action="Login">
+                            <br />
+
+                            <div class="form-group">
+                                @Html.Label("شماره تلفن")
+                                <input type="text" name="Phone" class="form-control" required />
+                            </div>
+
+                            <br />
+
+                            <div class="form-group">
+                                @Html.Label("رمز عبور")
+                                <input type="password" name="Password" class="form-control" required />
+                            </div>
+                            <br/>
+                            <button type="submit" class="btn btn-success">ورود</button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,92 @@
+﻿@{
+    ViewData["Title"] = "جزئیات محصول";
+    ViewData["Customer_ID"] = ViewBag.Id;
+    //using system.Reflection
+    //IEnumerable<ColorOptions> را دریافت کرده و به enum ColorOptions این خط تمام مقادیر
+    // تبدیل میکند
+     var EnumValue = Enum.GetValues(typeof(ColorOptions)).Cast<ColorOptions>();
+}
+
+<div class="container p-1 table-responsive">
+
+    <style>
+        .table td, .table th {
+            vertical-align: middle; /* مرکز عمودی */
+            text-align: center; /* مرکز افقی */
+        }
+    </style>
+
+    <table class="table table-bordered text-center">
+        <thead class="table-dark">
+            <tr>
+                <th>جدول جزئیات</th>
+                <th>موجودی در انبار</th>
+                <th>توضیحات محصول</th>
+                <th>رنگ محصول</th>
+                <th>تاریخ انتشار</th>
+            </tr>
+        </thead>
+        <tbody>
+            @*سطر نمایش اطلاعات*@
+
+            <tr>
+                <td class="table-dark sudo_th"> اطلاعات </td>
+                 <td>@ViewBag.Detail.In_Stock </td>
+                <td>
+                    <textarea rows="3" cols="50" readonly>@ViewBag.Detail.Detail_Description</textarea>
+                </td>
+                <td>@ViewBag.Detail.Detail_Color</td>
+                @{
+                    if (ViewBag.Detail.RegistrationDate == null)
+                    {
+                        <td> تاریخ ندارد </td>
+                    }
+                    else
+                    {
+                        <td>@ViewBag.Detail.RegistrationDate.ToString("yyyy/MM/dd")</td>
+                    }     
+                }
+                
+            </tr> 
+
+            @*سطر ویرایش اطلاعات*@
+            <form id="Form" asp-controller="Product" asp-action="DetailEdit" method="post">
+            <tr>
+                <td class="table-dark sudo_th">ویرایش اطلاعات</td>
+
+                <input type="hidden" name="Detail_Id" value="@ViewBag.Detail.Detail_Id" />
+                <td>
+                    <input class="text-center" type="number" name="In_Stock" min="0" max="100"
+                           value="@ViewBag.Detail.In_Stock"/>
+                </td>
+                <td>
+                    <textarea name="Detail_Description" rows="3" cols="50" 
+                        maxlength="200">@ViewBag.Detail.Detail_Description</textarea>
+                </td>
+                <td>
+                    <select class="text-center" name="Detail_Color">
+                        @*مقدار پیشفرض*@
+                        <option value="@ViewBag.Detail.Detail_Color">---انتخاب کنید---</option>
+
+                        @foreach (var value in EnumValue)
+                        {
+                                 // enum ColorOptions ارسال با نوع
+                            <option value="@value">@value.ToString()</option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <input class="text-center" type="date" name="RegistrationDate" />
+                </td>
+
+            </tr>
+            @*ارسال آیدی مشتری*@
+            <input type="hidden" name="Customer_ID" value="@ViewBag.Id" />
+            </form>
+        </tbody>
+    </table>    
+</div>
+@*دکمه بروزرسانی*@
+<div style="margin-left:10px;">
+    <input class="btn btn-primary" form="Form" type="submit" name="Save" value="ذخیره تغییرات" />
+</div>
