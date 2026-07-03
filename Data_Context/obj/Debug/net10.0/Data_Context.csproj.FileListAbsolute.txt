@@ -32,3 +32,4 @@ C:\Users\rafie\OneDrive\Desktop\EF_CORE\MVC(CRUD)\Data_Context\obj\Debug\net10.0
 C:\Users\rafie\OneDrive\Desktop\EF_CORE\MVC(CRUD)\Data_Context\obj\Debug\net10.0\Data_Context.pdb
 C:\Users\rafie\OneDrive\Desktop\EF_CORE\MVC(CRUD)\Data_Context\obj\Debug\net10.0\Data_Context.genruntimeconfig.cache
 C:\Users\rafie\OneDrive\Desktop\EF_CORE\MVC(CRUD)\Data_Context\obj\Debug\net10.0\ref\Data_Context.dll
+C:\Users\rafie\OneDrive\Desktop\EF_CORE\MVC(CRUD)\Data_Context\obj\Debug\net10.0\Data_Context.sourcelink.json

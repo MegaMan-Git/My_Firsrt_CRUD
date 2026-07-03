@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ModelAss")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+709274ac43d5648a56dd53f7d05aacc6d643564b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4aafc98bc842fb4fef0b183fa1d8250b20f57a93")]
 [assembly: System.Reflection.AssemblyProductAttribute("ModelAss")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ModelAss")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

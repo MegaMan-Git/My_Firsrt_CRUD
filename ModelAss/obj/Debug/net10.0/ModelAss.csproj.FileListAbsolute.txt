@@ -24,3 +24,4 @@ C:\Users\rafie\OneDrive\Desktop\EF_CORE\MVC(CRUD)\ModelAss\obj\Debug\net10.0\Mod
 C:\Users\rafie\OneDrive\Desktop\EF_CORE\MVC(CRUD)\ModelAss\obj\Debug\net10.0\ref\ModelAss.dll
 C:\Users\rafie\OneDrive\Desktop\EF_CORE\MVC(CRUD)\ModelAss\bin\Debug\net10.0\ModelAss.runtimeconfig.json
 C:\Users\rafie\OneDrive\Desktop\EF_CORE\MVC(CRUD)\ModelAss\obj\Debug\net10.0\ModelAss.genruntimeconfig.cache
+C:\Users\rafie\OneDrive\Desktop\EF_CORE\MVC(CRUD)\ModelAss\obj\Debug\net10.0\ModelAss.sourcelink.json
