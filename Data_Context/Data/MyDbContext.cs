@@ -20,8 +20,7 @@ namespace Data_Context.Data
             
         }
         //یادم رفته بود پابلیکشون کنم
-           public DbSet<Customer> Customers {  get; set; }
-           public DbSet<Customer_Product> Customer_Products { get; set; }
+           public DbSet<ApplicationUser_Product> ApplicationUser_Products {  get; set; }
            public DbSet<Product> Products { get; set; }
            public DbSet<Category> Categories { get; set; }
            public DbSet<Detail> Details {  get; set; }
@@ -31,12 +30,10 @@ namespace Data_Context.Data
             base.OnModelCreating(modelBuilder);
 
             #region کانفیگ خصوصیات مدل ها
-            modelBuilder.ApplyConfiguration(new Fluent_CategoryConfig());
-            modelBuilder.ApplyConfiguration(new Fluent_Customer_ProductConfig());
-            modelBuilder.ApplyConfiguration(new Fluent_CustomerConfig());
+            modelBuilder.ApplyConfiguration(new Fluent_CategoryConfig()); 
             modelBuilder.ApplyConfiguration(new Fluent_DetailConfig());
             modelBuilder.ApplyConfiguration(new Fluent_ProductConfig());
-
+            modelBuilder.ApplyConfiguration(new Fluent_ApplicationUser_ProductsConfig());
             modelBuilder.ApplyConfiguration(new Fluent_ApplicationUserConfig());
             modelBuilder.ApplyConfiguration(new Fluent_ApplicationRoleConfig());
             modelBuilder.Entity<IdentityUserClaim<Guid>>(p => p.ToTable("MyUserClaims"));
@@ -85,27 +82,6 @@ namespace Data_Context.Data
                     RegistrationDate = new DateTime(2026, 3, 29, 12, 0, 0, DateTimeKind.Utc)
                 }
                 );
-            modelBuilder
-                .Entity<Customer>()
-                .HasData(
-                new Customer
-                {
-                    Customer_Id = 1,
-                    FirstName = "AmirMohammad",
-                    LastName = "Rafiey",
-                    Password = "1234",
-                    Address = "Tehran",
-                    Phone = "09123456789"
-                }
-                );
-            // سید دیتا جدول میانی رو یادم رفت دستی اضافه کردم دیتابیس
-            /*
-             modelBuilder
-                .Entity<Customer_Product>()
-                .HasData(
-                new Customer_Product { Customer_id =1, Product_id =1}
-                );
-             */
             #endregion
         }
     }

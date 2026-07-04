@@ -19,7 +19,7 @@ namespace Data_Context.Data
         public int Category_ID;
         public Category category { get; set; }
         public Detail detail { get; set; }
-        public ICollection<Customer_Product> Fluent_ProductCustomers { get; set; }
+        public ICollection<ApplicationUser_Product> ApplicationUserProducts { get; set; }
 
 
     }
