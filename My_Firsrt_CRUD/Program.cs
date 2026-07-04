@@ -1,17 +1,44 @@
-using Microsoft.EntityFrameworkCore;
 using Data_Context.Data;
-using ModelAss.IdentityModels;
-using Microsoft.Extensions.FileSystemGlobbing.Internal.Patterns;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileSystemGlobbing.Internal.Patterns;
+using ModelAss.IdentityModels;
+using ModelAss.PersianIdentityErrors;
+using My_Firsrt_CRUD.Tools;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
 #region Identity
-builder.Services.AddIdentity<ApplicationUser,ApplicationRole>()
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+{
+    //User Option
+    options.User.RequireUniqueEmail = true;
+    
+    //SignIn Option
+    options.SignIn.RequireConfirmedEmail = true;
+    options.SignIn.RequireConfirmedPhoneNumber = false;
+    
+    //Password Option
+    //پ.ن: حالا سر رمز اذیت نمیشم
+    options.Password.RequiredLength = 4;
+    options.Password.RequireDigit = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequiredUniqueChars = 0;
+    
+    //Lockout Option
+    options.Lockout.MaxFailedAccessAttempts = 3;
+    //اتک رو میگیره ddos پ.ن: فکر کنم اگه باشه جلوی 
+    options.Lockout.AllowedForNewUsers = true;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+})
     .AddEntityFrameworkStores<MyDbContext>()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddErrorDescriber<PersianIdentityErrors>();
 #endregion
 
 #region SqlServer
@@ -25,7 +52,10 @@ builder.Services.AddDbContext<MyDbContext>(option =>
 
 #endregion
 
-
+#region DI
+builder.Services.AddScoped<ViewRenderService>();
+builder.Services.AddScoped<EmailSender>();
+#endregion
 
 var app = builder.Build();
 
