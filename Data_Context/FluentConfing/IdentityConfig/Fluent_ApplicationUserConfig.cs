@@ -16,7 +16,7 @@ namespace Data_Context.FluentConfing.IdentityConfig
 
             builder.Property(p => p.UserName).HasMaxLength(128).IsRequired();
             builder.Property(p => p.NormalizedUserName).HasMaxLength(128).IsRequired();
-            builder.Property(p => p.Email).HasMaxLength(100);
+            builder.Property(p => p.Email).HasMaxLength(100).IsRequired();
             builder.Property(p => p.NormalizedEmail).HasMaxLength(100);
             builder.Property(p => p.PasswordHash).HasMaxLength(128);
 
