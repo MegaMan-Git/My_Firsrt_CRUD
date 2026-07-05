@@ -1,91 +1,176 @@
 ﻿using Data_Context.Data;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
+using ModelAss.IdentityModels;
 using ModelAss.Models;
 using ModelAss.ViewList;
+using My_Firsrt_CRUD.Tools;
+using System.Text;
 
 namespace My_Firsrt_CRUD.Controllers
 {
     public class AccountController : Controller
     {
-        private MyDbContext _context;
-
-        public AccountController(MyDbContext context)
+        #region Dependency Injection
+        private readonly MyDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ViewRenderService _viewRenderService;
+        private readonly EmailSender _emailSender;
+     
+        public AccountController
+            (UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
+            ViewRenderService viewRenderService, EmailSender emailSender, MyDbContext context)
         {
             _context = context;
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _viewRenderService = viewRenderService;
+            _emailSender = emailSender;
         }
+        #endregion
 
-        public ActionResult SignUpLogin()
+        #region  صفحه ثبت نام و لاگین
+        public async Task<ActionResult> SignUpLogin(string returnUrl = null)
         {
+            if(returnUrl == null)
+                returnUrl = Url.Content("~/Product/Products");
+
+            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
+        #endregion
 
-
-        // Post: AccountController/Login
+        #region عملیات ثبت نام 
         [HttpPost]
-        public ActionResult Login(ViewModel_LoginCustomer customer)
+        public async Task<ActionResult> SignUp(ViewModel_SignUpUser model)
         {
-            if (ModelState.IsValid)
+
+            if(!ModelState.IsValid)
+                return View("SignUpLogin");
+
+
+            var result = await _userManager.CreateAsync(new ApplicationUser()
             {
-                //آیا اطلاعات کاربر وجود دارد؟
-                var Customer = _context.Customers
-                .FirstOrDefault(p => p.Phone == customer.Phone && p.Password == customer.Password);
-                //بله
-                if(Customer != null)
+                UserName = model.UserName,
+                NormalizedUserName = model.UserName.ToUpper(),
+                Email = model.Email,
+                NormalizedEmail = model.Email.ToUpper(),
+                
+            },model.Password);
+        
+            if(!result.Succeeded)
+            {
+                foreach(var error  in result.Errors)
                 {
-                    return RedirectToAction("Products", "Product", new {id = Customer.Customer_Id });
-                }//خیر
-                else
-                {
-                    return RedirectToAction("SignUpLogin");
+                    ModelState.AddModelError("",error.Description);
                 }
+
+                return View("SignUpLogin");
             }
 
+            //پیدا کردن کاربر تازه ثبت نام شده
+            var user = await _userManager.FindByNameAsync(model.UserName);
+
+            //ایجاد رابطه اولیه کاربر با محصولات
+            await _context.ApplicationUser_Products.AddAsync(new ApplicationUser_Product()
+            {
+                userId = user.Id,
+                productId = 1 //محصول مخفی
+            });
+            await _context.SaveChangesAsync();
+            //لاگین کردن
+            await _signInManager.SignInAsync(user,false);
+
+            return  RedirectToAction("Products","Product");
+        }
+        #endregion
+
+        #region عملیات ورود 
+        [HttpPost]
+        public async Task<ActionResult> Login(ViewModel_LoginUser model, string returnUrl = null)
+        {
+            //اگر خالی بود آدرس صفحه اصلی رو بده
+            if (returnUrl == null)
+                returnUrl = Url.Content("~/Product/Products");
+
+            if (!ModelState.IsValid)
+            {
+                return View("SignUpLogin", model);
+            }
+
+            var user = await _userManager.FindByNameAsync(model.UserName);
+            if(user == null)
+            {
+                ModelState.AddModelError(string.Empty, "نام کاربری یا رمز صحیح نمیباشد");
+
+                return View("SignUpLogin",model);
+            }
+
+            var result = await _signInManager
+                .PasswordSignInAsync(user,model.Password,model.RememberMe,false);
+
+            if (result.Succeeded)
+            {
+                if (Url.IsLocalUrl(returnUrl))
+                    return Redirect(returnUrl);
+                else
+                    return RedirectToAction("Products", "Product");
+            }else if (result.IsLockedOut)
+            {
+                ModelState.AddModelError(string.Empty, "حساب کاربری به مدت چند دقیقه قفل شده");
+
+                return View("SignUpLogin", model);
+            }
+
+            ModelState.AddModelError(string.Empty, "مشکلی در احرازهویت شما پیش آمده");
+
+            return View("SignUpLogin", model);
+        }
+        #endregion
+
+        #region عملیات خروج
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LogOut()
+        {
+            await _signInManager.SignOutAsync();
             return RedirectToAction("SignUpLogin");
         }
 
+        #endregion
+        //public async Task<ActionResult> EmailConfirmation(string token, string email)
+        //{
+        //    if (token == null || email == null) 
+        //        return BadRequest();
 
-        // POST: AccountController/SignUp
-        [HttpPost]
-        public ActionResult SignUp(ViewModel_SignCustomer customer)
-        {
-            if (ModelState.IsValid)
-            {
-                //کاربر قبلا ثبت نام کرده؟
-                var Customer = _context.Customers.FirstOrDefault(p => p.Phone == customer.Phone);
-                if(Customer != null)
-                {
-                    return RedirectToAction("SignUpLogin");
-                }
-                //ایجاد بدنه
-                var NewCustomer = new Customer
-                {
-                    FirstName = customer.FirstName,
-                    LastName = customer.LastName,
-                    Address = customer.Address,
-                    Phone = customer.Phone,
-                    Password = customer.Password,
-                };
+        //    var user = await _userManager.FindByEmailAsync(email);
+        //    if(user == null) 
+        //        return BadRequest();
 
-                //ثبت بدنه
-                _context.Customers.Add(NewCustomer);
-                _context.SaveChanges();
+        //}
 
-                //ایجاد رابطه اولیه
-                var NewRelation = new Customer_Product
-                {
-                    Customer_id = NewCustomer.Customer_Id,
-                    Product_id = 1,
-                };
-                //ثبت رابطه اولیه
-                _context.Customer_Products.Add(NewRelation);
-                _context.SaveChanges();
+        //ساخت توکن برای تایید ایمیل
+        //var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        ////انکود کردن توکن
+        //token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
-                return RedirectToAction("Products", "Product", new {id = NewCustomer.Customer_Id });
-            }
-            return BadRequest();
-        }
+        //    //ساخت لینکی که پس از کلیک کاربر روی تایید حساب اجرا میشه
+        //    string? callBackString =
+        //        Url.Action("EmailConfirmation", "Account", new { userId = user.Id, token }, Request.Scheme);
 
-        
+        ////string به html تزریق لینک تایید ایمیل به صفحه تایید ایمیل و تبدیل 
+        ////هست string سرویس ارسال ایمیل هم body زیرا 
+        //string body = await _viewRenderService.RenderToStringAsync
+        //    (ControllerContext, "_RegisterEmail", callBackString);
+
+        ////ارسال ایمیل به کاربر
+        //await _emailSender
+        //    .SendEmailAsync(new EmailModel(user.Email, $"آیا {user.UserName} شما هستید؟", body));
+
+
     }
 }

@@ -1,6 +1,6 @@
 ﻿@{
     ViewData["Title"] = "جزئیات محصول";
-    ViewData["Customer_ID"] = ViewBag.Id;
+   
     //using system.Reflection
     //IEnumerable<ColorOptions> را دریافت کرده و به enum ColorOptions این خط تمام مقادیر
     // تبدیل میکند
@@ -31,11 +31,16 @@
 
             <tr>
                 <td class="table-dark sudo_th"> اطلاعات </td>
-                 <td>@ViewBag.Detail.In_Stock </td>
+                 
+                <td>@ViewBag.Detail.In_Stock </td>
+                
                 <td>
                     <textarea rows="3" cols="50" readonly>@ViewBag.Detail.Detail_Description</textarea>
+                
                 </td>
+                
                 <td>@ViewBag.Detail.Detail_Color</td>
+                
                 @{
                     if (ViewBag.Detail.RegistrationDate == null)
                     {
@@ -80,8 +85,7 @@
                 </td>
 
             </tr>
-            @*ارسال آیدی مشتری*@
-            <input type="hidden" name="Customer_ID" value="@ViewBag.Id" />
+            
             </form>
         </tbody>
     </table>    

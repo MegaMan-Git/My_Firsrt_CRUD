@@ -18,7 +18,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     options.User.RequireUniqueEmail = true;
     
     //SignIn Option
-    options.SignIn.RequireConfirmedEmail = true;
+    options.SignIn.RequireConfirmedEmail = false;
     options.SignIn.RequireConfirmedPhoneNumber = false;
     
     //Password Option

@@ -1,7 +1,7 @@
 ﻿@model ModelAss.ViewList.ViewModel_Product
 @{
     ViewData["Title"] = "نمایش اطلاعات";
-    ViewData["Customer_ID"] = Model.Customer_ID;
+    
     var EnumValue = Enum.GetValues(typeof(ColorOptions)).Cast<ColorOptions>();
     //متغیری برای پرکردن آرایه ای که قرار است به کنترلر ارسال شود
     int i = 0;
@@ -15,7 +15,7 @@
         }
     </style>
 
-    <table class="table table-bordered text-center">
+    <table class="table table-bordered text-center" >
         <thead class="table-dark">
 
             <tr>
@@ -31,7 +31,7 @@
         </thead>
 
         <tbody>
-            <form id="Form_ProductCreate" asp-controller="Product" asp-action="ProductCreate" method="post">
+            <form id="Form_ProductCreate"  asp-controller="Product" asp-action="ProductCreate" method="post">
             @{           
                 <tr>
 
@@ -61,12 +61,11 @@
                             }
                         </select>
                 </td>
-                <td><input class="text-center" type="date" name="RegistrationDate" required /></td>
+                <td><input class="text-center" type="date" name="RegistrationDate"/></td>
 
                 </tr>
             }
-            @*ارسال آیدی مشتری*@
-            <input type="hidden" name="Customer_ID" value="@Model.Customer_ID" />
+            
             </form>
         </tbody>
     </table>
@@ -117,7 +116,7 @@
                                //دسته بندی فعلی (تکراری) را نشان نده
                                  @if(item.category.Category_Id != Category.Category_Id)
                                  {
-                                 <option value="@Category.Category_Id">@Category.Category_Name</option>
+                                    <option value="@Category.Category_Id">@Category.Category_Name</option>
                                  }         
                            }
                 </select>
@@ -125,22 +124,20 @@
                            <input type="hidden" name="Products[@i].Product_Id" value="@item.Product_Id" />
                     
                     </td>
-
+                    
                     <td>   
-                    <a asp-controller="Product" asp-action="DetailEdit"
-                    asp-route-id="@Model.Customer_ID" asp-route-itemid="@item.Product_Id">Detail</a>
+                    <a asp-controller="Product" asp-action="DetailEdit" asp-route-itemid="@item.Product_Id">Detail</a>
                     </td>
                     <td>
-                    <a asp-controller="Product" asp-action="ProductDelete"
-                    asp-route-id="@Model.Customer_ID" asp-route-itemid="@item.Product_Id">Delete</a>
+                    <a asp-controller="Product" asp-action="ProductDelete" asp-route-itemid="@item.Product_Id">Delete</a>
                     </td>
+                    
                 </tr>
 
                 i++;
                 }
             }
-            @*ارسال آیدی مشتری*@
-            <input type="hidden" name="Customer_ID" value="@Model.Customer_ID" />
+            
                 </form>
             </tbody>     
         </table>

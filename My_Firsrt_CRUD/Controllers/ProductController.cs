@@ -8,45 +8,62 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using ModelAss.ColorOptions_ForDetail;
+using Microsoft.AspNetCore.Identity;
+using ModelAss.IdentityModels;
+using System.Security.Claims;
 
 namespace My_Firsrt_CRUD.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly ILogger<ProductController> _logger;
+        #region Dependency Injection
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly MyDbContext _context;
-        public ProductController(ILogger<ProductController> logger, MyDbContext context)
+        public ProductController(UserManager<ApplicationUser> userManager, MyDbContext context)
         {
-            _logger = logger;
+            _userManager = userManager;
             _context = context;
         }
-        
-        #region نمایش محصولات
-        public IActionResult Products(int? id)
+        #endregion
+
+        #region متد دریافت اطلاعات کاربر
+        private async Task<ApplicationUser?> GetUser()
         {
-            if (id == null)
+            var user = await _userManager.GetUserAsync(User);
+            if(user != null)
             {
-                return NotFound();
+                return user;     
             }
+            return null;
+        }
+        #endregion
 
-            //فقط ایدی محصولات مربوط به مشتری مدنظر را واکشی میکند
-            var Product_IDs = _context.Customer_Products
-                    .Where(p => p.Customer_id == id).Select(p => p.Product_id);
+        #region نمایش محصولات
+        public async Task<IActionResult> Products()
+        {
+            #region دریافت اطلاعات کاربر فعلی
+            var user = await GetUser();
+            if(user == null)
+                return NotFound("کاربر پیدا نشد");
+            #endregion
 
-            var MV = new ViewModel_Product
+            #region آیدی محصولات مربوط به مشتری مدنظر را واکشی میکند
+            var Product_IDs = await _context.ApplicationUser_Products
+                    .Where(p => p.userId == user.Id).Select(p => p.productId).ToListAsync();
+            #endregion
+
+            var MV =  new ViewModel_Product
             {
                 // .Include() با استفاده از
-                // داده‌ ها بر اساس روابط کلید خارجی واکشی و به شیء اصلی متصل (جایگذاری) می‌شوند
+                // داده ها بر اساس روابط کلید خارجی واکشی و به شیء اصلی متصل (جایگذاری) میشوند
                 // بنابراین کتگوری مرتبط به محصول واکشی میشود
-                Products = _context.Products.Include(p => p.category)
+                Products = await _context.Products.Include(p => p.category)
                 //فقط محصولات مربوط به مشتری مدنظر را واکشی میکند
-                   .Where(p => Product_IDs.Contains(p.Product_Id)).ToList(),
+                   .Where(p => Product_IDs.Contains(p.Product_Id)).ToListAsync(),
 
                 // جهت نمایش و تغییر دسته بندی ها در صفحه نمایش محصولات
-                Categories = _context.Categories.ToList(),
-
-                //انتقال آیدی
-                Customer_ID = (int)id
+                Categories = await _context.Categories.ToListAsync()
+              
             };
 
 
@@ -57,14 +74,19 @@ namespace My_Firsrt_CRUD.Controllers
             return View(MV);
         }
         #endregion
-        
+
         #region ایجاد محصول جدید
         [HttpPost]
-
-        public IActionResult ProductCreate(ViewModel_CreateProduct model)
+        public async Task<IActionResult> ProductCreate(ViewModel_CreateProduct model)
         {
-            if (model != null)
+            if (ModelState.IsValid)
             {
+                #region دریافت اطلاعات کاربر فعلی
+            var user = await GetUser();
+            if(user == null)
+                return NotFound("کاربر پیدا نشد");
+            #endregion
+
 
                 #region افزودن ابتدا محصول سپس جزئیات آن
                 var NewProduct = new Product
@@ -74,8 +96,8 @@ namespace My_Firsrt_CRUD.Controllers
                     Category_ID = model.Category_ID
                 };
 
-                _context.Products.Add(NewProduct);
-                _context.SaveChanges();
+                await _context.Products.AddAsync(NewProduct);
+                await _context.SaveChangesAsync();
 
                 var NewDetail = new Detail
                 {
@@ -86,51 +108,54 @@ namespace My_Firsrt_CRUD.Controllers
                     RegistrationDate = model.RegistrationDate
                 };
 
-                _context.Details.Add(NewDetail);
-                _context.SaveChanges();
+                await _context.Details.AddAsync(NewDetail);
+                await _context.SaveChangesAsync();
                 #endregion
 
 
-                var NewRelation = new Customer_Product
+                var NewRelation = new ApplicationUser_Product
                 {
-                    Product_id = NewProduct.Product_Id,
-                    Customer_id = model.Customer_ID
+                    productId = NewProduct.Product_Id,
+                    userId = user.Id
                 };
-                _context.Customer_Products.Add(NewRelation);
-                _context.SaveChanges();
+                await _context.ApplicationUser_Products.AddAsync(NewRelation);
+                await _context.SaveChangesAsync();
 
-                return RedirectToAction("Products", new { id = model.Customer_ID });
+                return RedirectToAction("Products");
             }
 
-            return NotFound();
+            return RedirectToAction("Products");
         }
 
         #endregion
-        
+
         #region حذف محصول
-        public IActionResult ProductDelete(int? itemid, int id)
+        public async Task<IActionResult> ProductDelete(int? itemid)
         {
             if (itemid != null)
             {
-                var Product = _context.Products.Include(p => p.detail).FirstOrDefault(p => p.Product_Id == itemid);
+                var Product = await _context.Products
+                    .Include(p => p.detail)
+                    .FirstOrDefaultAsync(p => p.Product_Id == itemid);
                 if (Product != null)
                 {
                     _context.Details.Remove(Product.detail);
                     _context.Products.Remove(Product);
                 }
-                _context.SaveChanges();
-                return RedirectToAction("Products", id);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Products");
             }
-            return NotFound();
+            return NotFound("محصولی یافت نشد");
         }
         #endregion
         
         #region تغییر جزئیات محصول
-        public IActionResult DetailEdit(int? itemid, int id)
+        public async Task<IActionResult> DetailEdit(int? itemid)
         {
+
             if (itemid != null)
             {
-                var detail = _context.Details.FirstOrDefault(p => p.Detail_Id == itemid);
+                var detail = await _context.Details.FirstOrDefaultAsync(p => p.Detail_Id == itemid);
 
                 if (detail == null)
                 {
@@ -138,15 +163,13 @@ namespace My_Firsrt_CRUD.Controllers
                 }
                 //ارسال
                 ViewBag.Detail = detail;
-                //آیدی مشتری
-                ViewBag.Id = id;
             }
             return View();
         }
         [HttpPost]
-        public IActionResult DetailEdit(ViewModelDetail detail)
+        public async Task<IActionResult> DetailEdit(ViewModelDetail detail)
         {
-            var EditDetail = _context.Details.FirstOrDefault(p => p.Detail_Id == detail.Detail_Id);
+            var EditDetail = await _context.Details.FirstOrDefaultAsync(p => p.Detail_Id == detail.Detail_Id);
             if (EditDetail == null)
             {
                 return BadRequest();
@@ -161,30 +184,35 @@ namespace My_Firsrt_CRUD.Controllers
                 EditDetail.RegistrationDate = detail.RegistrationDate;
             }
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            return RedirectToAction("DetailEdit", new { itemid = detail.Detail_Id, id = detail.Customer_ID });
+            return RedirectToAction("DetailEdit", new { itemid = detail.Detail_Id });
         }
 
         #endregion
-        
+
         #region نمایش دسته بندی ها
 
-        public IActionResult Categories(int id)
+        public async Task<IActionResult> Categories()
         {
+            #region دریافت اطلاعات کاربر فعلی
+            var user = await GetUser();
+            if (user == null)
+                return NotFound("کاربر پیدا نشد");
+            #endregion
+
             var VM = new ViewModel_Product
             {
-                Categories = _context.Categories.ToList(),
-                Customer_ID = id
+                Categories = await _context.Categories.ToListAsync()               
             };
 
             return View(VM);
         }
         #endregion
-        
+
         #region ایجاد دسته بندی
         [HttpPost]
-        public IActionResult CategoryCreate(string? Category_NewName, int Customer_ID)
+        public async Task<IActionResult> CategoryCreate(string? Category_NewName)
         {
             if (Category_NewName != null)
             {
@@ -192,32 +220,53 @@ namespace My_Firsrt_CRUD.Controllers
                 {
                     Category_Name = Category_NewName
                 };
-                _context.Categories.Add(NewCategory);
-                _context.SaveChanges();
+                await _context.Categories.AddAsync(NewCategory);
+                await _context.SaveChangesAsync();
             }
-            return RedirectToAction("Categories", new { id = Customer_ID });
+            return RedirectToAction("Categories");
         }
         #endregion
         
         #region  بروزرسانی دسته بندی محصولات
         [HttpPost]
         //تغییر دسته بندی از بین گزینه های موجود
-        public IActionResult CategoryUpdate(ProductListUpdateModel model)
+        public async Task<IActionResult> CategoryUpdate(ProductListUpdateModel model)
         {
-            if (model != null)
+            if (model?.Products == null || !model.Products.Any())
+                return RedirectToAction("Products");
+
+            var categoryMap = model.Products
+                .ToDictionary(p => p.Product_Id, p => p.Category_Id);
+
+            var productIds = categoryMap.Keys.ToList();
+
+            var products = await _context.Products
+                .Where(p => productIds.Contains(p.Product_Id))
+                .ToListAsync();
+
+            foreach (var product in products)
             {
-                foreach (var item in model.Products)
-                {
-                    var Temp = _context.Products.FirstOrDefault(p => p.Product_Id == item.Product_Id);
-                    if (Temp != null)
-                    {
-                        Temp.Category_ID = item.Category_Id;
-                    }
-                }
-                _context.SaveChanges();
+                product.Category_ID = categoryMap[product.Product_Id];
             }
 
-            return RedirectToAction("Products", new { id = model.Customer_ID });
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Products");
+
+            //if (model != null)
+            //{
+            //    foreach (var item in model.Products)
+            //    {
+            //        var Temp = await _context.Products.FirstOrDefaultAsync(p => p.Product_Id == item.Product_Id);
+            //        if (Temp != null)
+            //        {
+            //            Temp.Category_ID = item.Category_Id;
+            //        }
+            //    }
+            //    await _context.SaveChangesAsync();
+            //}
+
+            //return RedirectToAction("Products");
         }
         //تغییرنام دسته بندی های موجود
         public IActionResult CategoryNameUpdate(ListCategories model)
@@ -238,32 +287,33 @@ namespace My_Firsrt_CRUD.Controllers
                 }
                 _context.SaveChanges();
             }
-            return RedirectToAction("Categories", new { id = model.Customer_ID });
+            return RedirectToAction("Categories");
         }
         #endregion 
         
         #region حذف دسته بندی
-        public IActionResult CategoryDelete(int CategoryID, int Customer_ID)
+        public async Task<IActionResult> CategoryDelete(int CategoryID)
         {
             #region تغییر دسته بندی محصولاتی که قرار است دسته بندی آنان حذف شود
-            var ProductsCategory_ID = _context.Products.Where(p => p.Category_ID == CategoryID).ToList();
+            var ProductsCategory_ID = await _context.Products
+                .Where(p => p.Category_ID == CategoryID).ToListAsync();
             if (ProductsCategory_ID != null)
             {
                 foreach (var items in ProductsCategory_ID)
                 {
                     items.Category_ID = 1;
                 }
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
             #endregion
 
-            var item = _context.Categories.Find(CategoryID);
+            var item = await _context.Categories.FindAsync(CategoryID);
             if (item != null)
             {
                 _context.Categories.Remove(item);
             }
-            _context.SaveChanges();
-            return RedirectToAction("Categories", new { id = Customer_ID });
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Categories");
         }
         #endregion
 

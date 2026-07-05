@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ModelAss.ViewList
 {
-    public class ViewModel_SignCustomer
+    public class ViewModel_SignUpUser
     {
         [Required(ErrorMessage ="نام کاربری الزامی هست"),MaxLength(128)]
         public string UserName { get; set; }
@@ -20,12 +20,14 @@ namespace ModelAss.ViewList
         [Required]
         public string Password { get; set; }
     }
-    public class ViewModel_LoginCustomer
+    public class ViewModel_LoginUser
     {
         [Required(ErrorMessage = "نام کاربری الزامی هست"), MaxLength(128)]
         public string UserName { get; set; }
         
         [Required]
         public string Password { get; set; }
+        
+        public bool RememberMe { get; set; }   
     }
 }

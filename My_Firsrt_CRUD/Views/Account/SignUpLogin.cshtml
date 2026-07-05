@@ -1,5 +1,7 @@
-﻿@{
+﻿@model ViewModel_LoginUser
+@{
     Layout = null;
+    var returnUrl = ViewBag.ReturnUrl as string;
 }
 
 <!DOCTYPE html>
@@ -12,11 +14,17 @@
     <link rel="stylesheet" href="~/My_Firsrt_CRUD.styles.css" asp-append-version="true" />
 </head>
 
-<body style="direction:rtl;">
+<body style="direction:rtl; margin:20px">
 
     <div class="container">
 
+        
+
         <div class="row">
+            <!-- نمایش کلیه خطاهای اعتبارسنجی ثبت نام و لاگین در بالای فرم ها -->
+            <div class="col-md-12">
+                <div asp-validation-summary="All" class="text-danger"></div>
+            </div>
 
             <!-- فرم سمت راست -->
             <div class="col-md-6">
@@ -24,7 +32,7 @@
 
                     <div class="panel-heading">
                         <br/>
-                        <h3 class="panel-title">ثبت‌ نام</h3>
+                        <h3 class="panel-title">ثبت نام</h3>
                         <br/>
                     </div>
 
@@ -34,15 +42,15 @@
                             <br/>
 
                             <div class="form-group">
-                                @Html.Label("نام") 
-                                <input type="text" name="FirstName" class="form-control" required />
+                                @Html.Label("نام کاربری") 
+                                <input type="text" name="UserName" class="form-control" required />
                             </div>
 
                             <br/>
 
                             <div class="form-group">
-                                @Html.Label("نام خانوادگی") 
-                                <input type="text" name="LastName" class="form-control" required />
+                                @Html.Label("ایمیل") 
+                                <input type="text" name="Email" class="form-control" required />
                             </div>
 
                             <br/>
@@ -55,20 +63,13 @@
                             <br/>
 
                             <div class="form-group">
-                                @Html.Label("آدرس") <br/>
-                                <input type="text" name="Address" class="form-control" required />
-                            </div>
-
-                            <br/>
-
-                            <div class="form-group">
                                 @Html.Label("رمز عبور") <br/>
                                 <input type="password" name="Password" class="form-control" required />
                             </div>
 
                             <br/>
 
-                            <button type="submit" class="btn btn-primary">ثبت‌نام</button>
+                            <button type="submit" class="btn btn-primary">ثبت نام</button>
                         </form>
                     </div>
 
@@ -91,8 +92,8 @@
                             <br />
 
                             <div class="form-group">
-                                @Html.Label("شماره تلفن")
-                                <input type="text" name="Phone" class="form-control" required />
+                                @Html.Label("نام کاربری")
+                                <input type="text" name="UserName" class="form-control" required />
                             </div>
 
                             <br />
@@ -101,7 +102,16 @@
                                 @Html.Label("رمز عبور")
                                 <input type="password" name="Password" class="form-control" required />
                             </div>
+                            
+                            <div class="form-check">
+                                <!-- استفاده از asp-for برای بایند کردن خودکار -->
+                                <label asp-for="RememberMe" class="form-check-label">من را به خاطر بسپار</label>
+                                <input type="checkbox" asp-for="RememberMe" />
+                            </div>
+
                             <br/>
+                            @*returnUrl ارسال*@
+                            <input type="hidden" asp-route-returnUrl="@returnUrl"/>
                             <button type="submit" class="btn btn-success">ورود</button>
                         </form>
                     </div>

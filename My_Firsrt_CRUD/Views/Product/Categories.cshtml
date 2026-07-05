@@ -1,7 +1,7 @@
 ﻿@model ModelAss.ViewList.ViewModel_Product
 @{
     ViewData["Title"] = "دسته بندی ها";
-    ViewData["Customer_ID"] = Model.Customer_ID;
+    
   
     int i = 0; //شمارنده برای ارسال دسته جمعی نام های تغییر داده شده
 }
@@ -39,14 +39,13 @@
                     <td>
                         @*لینک حذف دسته بندی*@
                         <a asp-controller="Product" asp-action="CategoryDelete" 
-                        asp-route-CategoryID="@item.Category_Id" asp-route-Customer_ID="@Model.Customer_ID">Delete</a>
+                        asp-route-CategoryID="@item.Category_Id">Delete</a>
                     </td>
                 </tr>
                 
             i++;    
             }
-            @*ارسال آیدی مشتری*@
-            <input type="hidden" asp-for ="Customer_ID" value="@Model.Customer_ID" />
+            
            </form>                
         </tbody>
         }
@@ -75,8 +74,7 @@
                     <input class="btn btn-primary" type="submit" name="Save" value="افزودن" />
                 </td>
             </tr>
-            @*ارسال آیدی مشتری*@
-            <input type="hidden" name="Customer_ID" value="@Model.Customer_ID" />
+            
             </form>
         </tbody>
     </table>
