@@ -82,6 +82,35 @@ namespace Data_Context.Data
                     RegistrationDate = new DateTime(2026, 3, 29, 12, 0, 0, DateTimeKind.Utc)
                 }
                 );
+            //ساخت ادمین
+            modelBuilder
+                .Entity<ApplicationUser>()
+                .HasData(new ApplicationUser()
+                {
+                Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                UserName = "Admin",
+                NormalizedUserName = "ADMIN",
+                Email = "rafieyg2708@gmail.com",
+                NormalizedEmail = "RAFIEYG2708@GMAIL.COM",
+                SecurityStamp = "ABCDEFGHIJKLMNO",
+                ConcurrencyStamp = "ONMLKJIHGFEDCBA",
+                EmailConfirmed = true,
+                PhoneNumberConfirmed = false,
+                TwoFactorEnabled = false,
+                //1234
+                PasswordHash = "AQAAAAIAAYagAAAAEFwOASqH0/Baj2Ys7rs9/R0c1K4eZNTjTLSmoaiNEVVYuyPhkWahpdgJBjJDXlSxGw=="
+
+                }
+                );
+            //مقداردهی جدول واسط بین محصول و کاربر
+            modelBuilder
+                .Entity<ApplicationUser_Product>()
+                .HasData(new ApplicationUser_Product()
+                {
+                    userId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                    //محصول مخفی
+                    productId = 1
+                });
             #endregion
         }
     }
