@@ -71,6 +71,10 @@ namespace My_Firsrt_CRUD.Controllers
             {
                 return NotFound();
             }
+
+            //آیا حساب تایید شده؟
+            ViewBag.IsEmailConfirmed = user.EmailConfirmed;
+
             return View(MV);
         }
         #endregion
@@ -152,6 +156,12 @@ namespace My_Firsrt_CRUD.Controllers
         #region تغییر جزئیات محصول
         public async Task<IActionResult> DetailEdit(int? itemid)
         {
+            #region دریافت اطلاعات کاربر فعلی
+            var user = await GetUser();
+            if (user == null)
+                return NotFound("کاربر پیدا نشد");
+            #endregion
+
 
             if (itemid != null)
             {
@@ -161,8 +171,10 @@ namespace My_Firsrt_CRUD.Controllers
                 {
                     return RedirectToAction("Error");
                 }
-                //ارسال
+                //ارسال جزئیات
                 ViewBag.Detail = detail;
+                //آیا حساب تایید شده؟
+                ViewBag.IsEmailConfirmed = user.EmailConfirmed;
             }
             return View();
         }
@@ -205,6 +217,9 @@ namespace My_Firsrt_CRUD.Controllers
             {
                 Categories = await _context.Categories.ToListAsync()               
             };
+
+            //آیا حساب تایید شده؟
+            ViewBag.IsEmailConfirmed = user.EmailConfirmed;
 
             return View(VM);
         }
@@ -269,13 +284,13 @@ namespace My_Firsrt_CRUD.Controllers
             //return RedirectToAction("Products");
         }
         //تغییرنام دسته بندی های موجود
-        public IActionResult CategoryNameUpdate(ListCategories model)
+        public async Task<IActionResult> CategoryNameUpdate(ListCategories model)
         {
             if (model != null)
             {
                 var IDs = model.Categories.Select(p => p.Category_Id).ToList();
 
-                var DB_Categories = _context.Categories.Where(p => IDs.Contains(p.Category_Id)).ToList();
+                var DB_Categories = await _context.Categories.Where(p => IDs.Contains(p.Category_Id)).ToListAsync();
 
                 foreach (var item in model.Categories)
                 {
@@ -285,7 +300,7 @@ namespace My_Firsrt_CRUD.Controllers
                         Temp.Category_Name = item.Category_NewName;
                     }
                 }
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
             return RedirectToAction("Categories");
         }

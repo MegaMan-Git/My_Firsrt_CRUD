@@ -21,7 +21,11 @@
             <a class="nav-link text-dark p-0" asp-controller="Product" asp-action="Categories">
                 دسته بندی ها
             </a>
-
+            @if(ViewBag.IsEmailConfirmed == false){
+               <a class="nav-link text-dark p-0" asp-controller="Account" asp-action="EmailConfirmed" >
+                   تایید ایمیل
+               </a>
+            }
             <form asp-controller="Account" asp-action="LogOut" method="post" class="m-0">
                 <button type="submit" class="btn btn-link nav-link">
                     خروج

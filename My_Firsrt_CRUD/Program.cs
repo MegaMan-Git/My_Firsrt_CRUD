@@ -54,7 +54,7 @@ builder.Services.AddDbContext<MyDbContext>(option =>
 
 #region DI
 builder.Services.AddScoped<ViewRenderService>();
-builder.Services.AddScoped<EmailSender>();
+builder.Services.AddScoped<IEmailSender,EmailSender>();
 #endregion
 
 var app = builder.Build();

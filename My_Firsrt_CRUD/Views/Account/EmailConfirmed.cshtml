@@ -1,0 +1,19 @@
+﻿@{
+    Layout = null;
+}
+<div class="text-center">
+
+    @if (ViewBag.IsEmailSend == true)
+    {
+        <div class="alert alert-success">
+            ایمیل با موفقیت به حساب شما ارسال شده
+        </div>
+        <p>جهت تایید حساب وارد ایمیل خود شوید و بر روی لینک تایید کلیک کنید</p>
+    }
+    else
+    {
+        <div class="alert alert-warning">
+            ایمیل شما قبلا تایید شده یا هنوز وارد حساب  خود نشده اید
+        </div>
+    }
+</div>

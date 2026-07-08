@@ -1,7 +1,5 @@
 ﻿using Data_Context.Data;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using ModelAss.IdentityModels;
@@ -19,11 +17,11 @@ namespace My_Firsrt_CRUD.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ViewRenderService _viewRenderService;
-        private readonly EmailSender _emailSender;
+        private readonly IEmailSender _emailSender;
      
         public AccountController
             (UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
-            ViewRenderService viewRenderService, EmailSender emailSender, MyDbContext context)
+            ViewRenderService viewRenderService, IEmailSender emailSender, MyDbContext context)
         {
             _context = context;
             _userManager = userManager;
@@ -103,6 +101,7 @@ namespace My_Firsrt_CRUD.Controllers
             }
 
             var user = await _userManager.FindByNameAsync(model.UserName);
+            
             if(user == null)
             {
                 ModelState.AddModelError(string.Empty, "نام کاربری یا رمز صحیح نمیباشد");
@@ -111,7 +110,7 @@ namespace My_Firsrt_CRUD.Controllers
             }
 
             var result = await _signInManager
-                .PasswordSignInAsync(user,model.Password,model.RememberMe,false);
+                .PasswordSignInAsync(model.UserName,model.Password,model.RememberMe,false);
 
             if (result.Succeeded)
             {
@@ -124,9 +123,16 @@ namespace My_Firsrt_CRUD.Controllers
                 ModelState.AddModelError(string.Empty, "حساب کاربری به مدت چند دقیقه قفل شده");
 
                 return View("SignUpLogin", model);
+            }else if (result.IsNotAllowed)
+            {
+                ModelState.AddModelError(string.Empty, "دسترسی نداری");
+            }else if (result.RequiresTwoFactor)
+            {
+                ModelState.AddModelError(string.Empty, "احراز هویت دو مرحله ای مورد نیاز هست");
             }
+           
 
-            ModelState.AddModelError(string.Empty, "مشکلی در احرازهویت شما پیش آمده");
+            ModelState.AddModelError(string.Empty, "رمز عبور صحیح نمیباشد");
 
             return View("SignUpLogin", model);
         }
@@ -142,35 +148,82 @@ namespace My_Firsrt_CRUD.Controllers
         }
 
         #endregion
-        //public async Task<ActionResult> EmailConfirmation(string token, string email)
-        //{
-        //    if (token == null || email == null) 
-        //        return BadRequest();
 
-        //    var user = await _userManager.FindByEmailAsync(email);
-        //    if(user == null) 
-        //        return BadRequest();
+        #region متد دریافت اطلاعات کاربر
+        private async Task<ApplicationUser?> GetUser()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                return user;
+            }
+            return null;
+        }
+        #endregion
 
-        //}
+        #region عملیات تایید ایمیل
+        public async Task<IActionResult> EmailConfirmed()
+        {
+            #region دریافت اطلاعات کاربر فعلی و آیا ایمیل از قبل تایید نشده؟
+            var user = await GetUser();
+            if (user == null || user.EmailConfirmed == true)
+            {
+                ViewBag.IsEmailSend = false;
+                return View();
+            }
+            #endregion
 
-        //ساخت توکن برای تایید ایمیل
-        //var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        ////انکود کردن توکن
-        //token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            //ساخت توکن برای تایید ایمیل
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            //انکود کردن توکن
+            token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
-        //    //ساخت لینکی که پس از کلیک کاربر روی تایید حساب اجرا میشه
-        //    string? callBackString =
-        //        Url.Action("EmailConfirmation", "Account", new { userId = user.Id, token }, Request.Scheme);
+            //ساخت لینکی که پس از کلیک کاربر روی تایید حساب اجرا میشه
+            string? callBackString =
+                Url.Action("EmailConfirmation", "Account", new { userId = user.Id.ToString(), token }, Request.Scheme);
 
-        ////string به html تزریق لینک تایید ایمیل به صفحه تایید ایمیل و تبدیل 
-        ////هست string سرویس ارسال ایمیل هم body زیرا 
-        //string body = await _viewRenderService.RenderToStringAsync
-        //    (ControllerContext, "_RegisterEmail", callBackString);
+            //string به html تزریق لینک تایید ایمیل به صفحه تایید ایمیل و تبدیل 
+            //هست string سرویس ارسال ایمیل هم body زیرا 
+            string body = await _viewRenderService.RenderToStringAsync
+                (ControllerContext, "_RegisterEmail", callBackString);
 
-        ////ارسال ایمیل به کاربر
-        //await _emailSender
-        //    .SendEmailAsync(new EmailModel(user.Email, $"آیا {user.UserName} شما هستید؟", body));
+            //ارسال ایمیل به کاربر
+            await _emailSender
+                .SendEmailAsync(new EmailModel(user.Email, $"آیا {user.UserName} شما هستید؟", body));
 
+            //جهت نمایش صفحه ارسال موفق
+            ViewBag.IsEmailSend = true;
+            return View();
+        }
+
+        public async Task<ActionResult> EmailConfirmation(string userId ,string token)
+        {
+            #region دریافت اطلاعات کاربر فعلی و آیا ایمیل از قبل تایید نشده؟
+            var USER = await GetUser();
+            if (USER == null || USER.EmailConfirmed == true)
+            {
+                ViewBag.IsEmailSend = false;
+                return RedirectToAction("Products", "Product");
+            }
+            #endregion
+
+            if (token == null || userId == null)
+                return BadRequest();
+
+            //اگر کاربر وجود نداشت ادامه نده
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return BadRequest();
+
+            // دیکود کردن توکن دریافتی جهت استفاده در متد تایید توکن
+            token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+
+            // ارسال توکن و کاربر جهت اعتبارسنجی توکن برای تایید حساب
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+
+            return RedirectToAction("Products", "Product");
+        }
+        #endregion
 
     }
 }

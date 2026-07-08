@@ -6,6 +6,7 @@ using System.Net.Mail;
 using System.Text;
 using FluentEmail.Core;
 using FluentEmail.Smtp;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace My_Firsrt_CRUD.Tools
 {
@@ -16,20 +17,21 @@ namespace My_Firsrt_CRUD.Tools
 
     public class EmailSender : IEmailSender
     {
-
+        
         public async Task SendEmailAsync(EmailModel model)
         {
-            var sender = new SmtpSender(() => new SmtpClient("smpt.gmail.com")
+            var sender = new SmtpSender(() => new SmtpClient("smtp.gmail.com")
             {
                 UseDefaultCredentials = false,
                 Port = 587,
-                Credentials = new NetworkCredential("rafieyg2708@gmail.com", "zhiq ylxm dtrb sioe")
+                EnableSsl = true,
+                Credentials = new NetworkCredential("your email", "your password")
             });
 
             Email.DefaultSender = sender;
 
             var email = await Email
-                 .From("rafieyg2708@gmail.com", "تایید ایمیل")
+                 .From("your email", "MVC(CRUD) سایت")
                  .To(model.To)
                  .Subject(model.Subject)
                  .Body(model.Body, isHtml: true)
