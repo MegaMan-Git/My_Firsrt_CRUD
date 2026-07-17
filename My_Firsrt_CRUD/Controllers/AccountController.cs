@@ -225,5 +225,83 @@ namespace My_Firsrt_CRUD.Controllers
         }
         #endregion
 
+        #region عملیات فراموشی رمز عبور
+
+        [HttpGet]
+        public async Task<IActionResult> ForgotPassword()
+        {
+            ViewBag.IsSent = false;
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPassword_VM model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "کاربری با این ایمیل یافت نشد");
+                return View(model);
+            }
+            
+            //ساخت توکن تعویض رمز عبور
+            string token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            //انکود کردن توکن
+            token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            //ساخت لینک ورود به صفحه تعویض رمز برای ایمیل
+            string? callBackString = 
+                Url.Action("ResetPassword", "Account", new {email = user.Email, token},Request.Scheme);
+            //بتواند ایمیل را ارسال کند emailsender برای اینکه  string به html تبدیل صفحه 
+            string body = await _viewRenderService
+                .RenderToStringAsync(ControllerContext , "_ResetPasswordEmail", callBackString);
+            //فراخوانی متد ارسال ایمیل
+            await _emailSender.SendEmailAsync(new EmailModel(model.Email,"درخواست تغییر رمز عبور",body));
+
+            
+            ViewBag.IsSent = true;
+            return View(model);
+        }
+
+        //عملیات های مربوط به تغییر رمز پس از کلیک روی لینک موجود در ایمیل
+        [HttpGet]
+        public async Task<IActionResult> ResetPassword(string email,string token)
+        {
+            if (email == null || token == null)
+                return BadRequest("این صفحه در دسترس نمیباشد");
+            var VM = new ResetPassword_VM()
+            {
+                Email = email,
+                Token = token
+            };
+            return View(VM);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPassword_VM model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+                return BadRequest("user not found");
+            //دیکود کردن توکن
+            model.Token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Token));
+            //تحویل دادن توکن و تعویض رمز عبور کاربر
+            var result = await _userManager.ResetPasswordAsync(user,model.Token,model.NewPassword);
+
+            if (result.Succeeded)
+                return RedirectToAction("SignUpLogin","Account");
+
+            ModelState.AddModelError(string.Empty, "مشکلی در تغییر رمز پیش آمده");
+
+            return View(model);
+        }
+        #endregion
     }
 }

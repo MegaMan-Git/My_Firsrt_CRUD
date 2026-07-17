@@ -25,13 +25,13 @@ namespace My_Firsrt_CRUD.Tools
                 UseDefaultCredentials = false,
                 Port = 587,
                 EnableSsl = true,
-                Credentials = new NetworkCredential("your email", "your password")
+                Credentials = new NetworkCredential("Host","Password")
             });
 
             Email.DefaultSender = sender;
 
             var email = await Email
-                 .From("your email", "MVC(CRUD) سایت")
+                 .From("Address", "MVC(CRUD) سایت")
                  .To(model.To)
                  .Subject(model.Subject)
                  .Body(model.Body, isHtml: true)

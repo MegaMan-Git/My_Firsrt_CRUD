@@ -103,8 +103,8 @@
                                 <input type="password" name="Password" class="form-control" required />
                             </div>
                             
-                            <div class="form-check">
-                                <!-- استفاده از asp-for برای بایند کردن خودکار -->
+                            <div class="form-check" style="margin-top:10px">
+                                
                                 <label asp-for="RememberMe" class="form-check-label">من را به خاطر بسپار</label>
                                 <input type="checkbox" asp-for="RememberMe" />
                             </div>
@@ -112,7 +112,16 @@
                             <br/>
                             @*returnUrl ارسال*@
                             <input type="hidden" asp-route-returnUrl="@returnUrl"/>
+                            
+                            @*دکمه ارسال*@
                             <button type="submit" class="btn btn-success">ورود</button>
+                            
+                            <span style="margin-right:20px">
+                                <a asp-action="ForgotPassword" asp-controller="Account">
+                                    رمز عبور خود را فراموش کرده ام 
+                                </a> 
+                            </span>
+
                         </form>
                     </div>
 
