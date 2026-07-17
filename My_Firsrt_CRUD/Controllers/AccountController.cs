@@ -44,8 +44,11 @@ namespace My_Firsrt_CRUD.Controllers
 
         #region عملیات ثبت نام 
         [HttpPost]
-        public async Task<ActionResult> SignUp(ViewModel_SignUpUser model)
+        public async Task<ActionResult> SignUp(ViewModel_SignUpUser model,string returnUrl = null)
         {
+
+            if (returnUrl == null)
+                returnUrl = Url.Content("~/Product/Products");
 
             if(!ModelState.IsValid)
                 return View("SignUpLogin");
@@ -83,13 +86,17 @@ namespace My_Firsrt_CRUD.Controllers
             //لاگین کردن
             await _signInManager.SignInAsync(user,false);
 
-            return  RedirectToAction("Products","Product");
+
+            if(Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
+            
+            return RedirectToAction("Products","Product");
         }
         #endregion
 
         #region عملیات ورود 
         [HttpPost]
-        public async Task<ActionResult> Login(ViewModel_LoginUser model, string returnUrl = null)
+        public async Task<ActionResult> Login(ViewModel_LoginUser model,string returnUrl = null)
         {
             //اگر خالی بود آدرس صفحه اصلی رو بده
             if (returnUrl == null)

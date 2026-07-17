@@ -1,7 +1,7 @@
 ﻿@model ViewModel_LoginUser
 @{
     Layout = null;
-    var returnUrl = ViewBag.ReturnUrl as string;
+    string returnUrl = ViewBag.ReturnUrl;
 }
 
 <!DOCTYPE html>
@@ -38,7 +38,7 @@
 
                     <div class="panel-body">
                         @*فرم ثبت نام*@
-                        <form asp-action="SignUp" method="post">
+                        <form asp-controller="Account" asp-action="SignUp" method="post">
                             <br/>
 
                             <div class="form-group">
@@ -68,6 +68,8 @@
                             </div>
 
                             <br/>
+                            @*returnUrl ارسال*@
+                            <input type="hidden" asp-for="@returnUrl" />
 
                             <button type="submit" class="btn btn-primary">ثبت نام</button>
                         </form>
@@ -88,7 +90,7 @@
                     
                     <div class="panel-body">
                         @*فرم ورود*@
-                        <form asp-action="Login">
+                        <form asp-controller="Account" asp-action="Login" method="post">
                             <br />
 
                             <div class="form-group">
@@ -111,7 +113,7 @@
 
                             <br/>
                             @*returnUrl ارسال*@
-                            <input type="hidden" asp-route-returnUrl="@returnUrl"/>
+                            <input type="hidden" asp-for="@returnUrl" />
                             
                             @*دکمه ارسال*@
                             <button type="submit" class="btn btn-success">ورود</button>

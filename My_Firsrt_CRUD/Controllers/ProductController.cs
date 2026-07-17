@@ -11,9 +11,11 @@ using ModelAss.ColorOptions_ForDetail;
 using Microsoft.AspNetCore.Identity;
 using ModelAss.IdentityModels;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace My_Firsrt_CRUD.Controllers
 {
+    [Authorize]
     public class ProductController : Controller
     {
         #region Dependency Injection

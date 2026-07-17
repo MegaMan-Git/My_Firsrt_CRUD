@@ -1,4 +1,5 @@
 using Data_Context.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileSystemGlobbing.Internal.Patterns;
@@ -41,6 +42,13 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     .AddErrorDescriber<PersianIdentityErrors>();
 #endregion
 
+#region Cookies
+builder.Services.ConfigureApplicationCookie(options =>
+    {
+        options.LoginPath = "/Account/SignUpLogin";
+    });
+#endregion
+
 #region SqlServer
 
 builder.Services.AddDbContext<MyDbContext>(option =>
@@ -63,28 +71,28 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Product/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    // The default HSTS value is 30 days.
+    // You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseRouting();
 app.MapControllerRoute
     (
-
     name: "Account",
-    pattern: "{controller=Account}/{action=SignUpLogin}"
+    pattern: "{controller=Account}/{action=SignUpLogin}/{id?}"
     );
 
 //app.MapControllerRoute(
 //    name: "Product",
 //    pattern: "{controller=Product}/{action=Products}/{id}")
 //    .WithStaticAssets();
-
 
 app.Run();
